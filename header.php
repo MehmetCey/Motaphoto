@@ -24,4 +24,7 @@
       ?>
     </nav>
   </div>
+  <div class="header-img">
+    <img src="<?php echo get_template_directory_uri(); ?>/assets/img/Header.png" alt="photo d'un événement en fond de l'écriture Photographe Event">
+  </div>
 </header>
