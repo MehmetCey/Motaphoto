@@ -1,4 +1,4 @@
-  <div class="contact-overlay">
+  <div class="contact-overlay popup-display-none">
     <div class="close-buton">
       <span class="popup-close"><i class="fa-solid fa-xmark"></i></span>
     </div>

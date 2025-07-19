@@ -8,7 +8,7 @@
     ]);
     ?>
   </nav>
-<?php get_template_part('template_parts/popup.php'); ?>
+<?php get_template_part('template_parts/popup'); ?>
 </footer>
 
 <?php wp_footer(); ?>
