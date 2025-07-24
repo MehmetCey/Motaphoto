@@ -246,6 +246,10 @@ margin-top: 20px;
   box-shadow: 0px 2px 1px 0px rgba(0, 0, 0, 0.02);
 }
 
+.wpcf7-response-output {
+  display: none;
+}
+
 .popup-close{
     position:fixed;
     top: -14px;
@@ -303,7 +307,7 @@ margin-top: 20px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 5vh 5vw;
+  padding: 1vh 5vw;
 }
 
 .photo-infos {
@@ -330,6 +334,8 @@ margin-top: 20px;
   letter-spacing: 10%;
   vertical-align: middle;
   text-transform: uppercase;
+  color: black;
+  text-decoration: none;
 }
 
 .photo-date {
@@ -355,22 +361,23 @@ margin-top: 20px;
 .content-underpost {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin:0 5vw 0 5vw;
-  padding-bottom: 5vh;
   border-bottom: 1px solid black;
 }
 
 .photo-contact {
   width: 42vw;
+  height: 100%;
   display: flex;
   flex-direction: row;
+  align-items: center;
   justify-content: space-between;
 }
 
 .contact-button {
-  width: 45%;
-  height: 100%;
+  width: 272px;
+  height: 50px;
   padding: 8px 15px;
   border-radius: 2px;
   background: rgba(216, 216, 216, 1);
@@ -386,6 +393,37 @@ margin-top: 20px;
   gap: 10px;
 }
 
+
+/* photo navigation */
+
 .photo-card {
   width: 42vw;
+}
+
+.photo-navigation {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.next-photo-preview img {
+  width: 6vw;
+  height: auto;
+}
+
+.arrows {
+  width: 6vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.nav-arrow {
+  text-decoration: none;
+  color: black;
+  text-align: center;
+}
+
+.fa-arrow-up {
+  font-size: 25px;
 }

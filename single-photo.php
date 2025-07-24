@@ -12,14 +12,14 @@ get_header();
                     <!-- Titre -->
                     <h2 class=""><?php the_title(); ?></h2>
 
-                    <p class="description-photo">Référence : <span class="photo-ref-value"><?php echo esc_html( SCF::get('référence') ); ?></span></p>
+                    <p class="description-photo">Référence : <span class="photo-ref-value"><?php echo esc_html( SCF::get('reference') ); ?></span></p>
 
-                    <p class="description-photo">Catégorie : 
-                        <?php echo get_the_term_list( get_the_ID(), 'categorie', '', ', ' ); ?>
+                    <p class="description-photo">Catégorie :
+                        <?php echo implode(', ', wp_list_pluck(wp_get_post_terms(get_the_ID(), 'categorie'), 'name')); ?>
                     </p>
 
-                    <p class="description-photo">Format : 
-                        <?php echo get_the_term_list( get_the_ID(), 'format', '', ', ' ); ?>
+                    <p class="description-photo">Catégorie :
+                        <?php echo implode(', ', wp_list_pluck(wp_get_post_terms(get_the_ID(), 'format'), 'name')); ?>
                     </p>
 
                     <p class="description-photo">Type : <?php echo esc_html( SCF::get('type') ); ?></p>
@@ -37,18 +37,67 @@ get_header();
                 <?php endif; ?>
 
             </div>
-        <div class="content-underpost">
-            <div class="photo-contact">
-                <p>Cette photo vous intéresse ?</p>    
-                <button class="contact-button">Contact</button>
+            <div class="content-underpost">
+                <div class="photo-contact">
+                    <p>Cette photo vous intéresse ?</p>    
+                    <button class="contact-button">Contact</button>
+                </div>
+                <div class="photo-card">
+                    <?php
+                    $prev_post = get_previous_post();
+                    $next_post = get_next_post();
+                    ?>
+                    <?php
+                    $current_id = get_the_ID();
+                    $args = array(
+                    'post_type' => 'photo',
+                    'posts_per_page' => -1,
+                    'orderby' => 'date',
+                    'order' => 'ASC',
+                    'fields' => 'ids',
+                    );
+                    $all_photos = get_posts($args);
+
+                    $current_index = array_search($current_id, $all_photos);
+
+                    $prev_index = $current_index - 1;
+                    $next_index = $current_index + 1;
+
+                    if ($prev_index < 0) {
+                    $prev_index = count($all_photos) - 1;
+                    }
+                    if ($next_index >= count($all_photos)) {
+                    $next_index = 0;
+                    }
+
+                    $prev_id = $all_photos[$prev_index];
+                    $next_id = $all_photos[$next_index];
+                    ?>
+                    <div class="photo-navigation">
+                        <div class="next-photo-preview">
+                            <a href="<?php echo get_permalink($next_id); ?>">
+                            <?php echo get_the_post_thumbnail($next_id, 'thumbnail'); ?>
+                            </a>
+                        </div>
+                        <div class="arrows">
+                            <a href="<?php echo get_permalink($prev_id); ?>" class="nav-arrow left">
+                            <i class="fa-solid fa-arrow-up fa-rotate-270"></i>
+                            </a>
+
+                            <a href="<?php echo get_permalink($next_id); ?>" class="nav-arrow right">
+                            <i class="fa-solid fa-arrow-up fa-rotate-90"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
             </div>
-            <div class="photo-card">
-            </div>
-        </div>
+
         </article>
 
     <?php endwhile; endif; ?>
+<script>
+    var photoRef = "<?php echo esc_html( SCF::get('reference') ); ?>";
+</script>
 </main>
-
-<?php
-get_footer();
+<?php get_footer(); ?>

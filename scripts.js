@@ -11,8 +11,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (monBoutonContact && monPopup) {
         monBoutonContact.addEventListener("click", function () {
-            console.log("salut")
             monPopup.classList.remove("popup-display-none");
         });
     }
+
+    jQuery(document).ready(function($) {
+    $('#ref-photo').val(photoRef);
+    });
+
 });
+
