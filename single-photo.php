@@ -92,7 +92,43 @@ get_header();
 
                 </div>
             </div>
+            <div class="photo-similaire">
+                <h3>Vous aimerez aussi</h3>
+                        <div class="related-photos-container">
 
+                            <?php
+                            $categories = wp_get_post_terms(get_the_ID(), 'categorie', ['fields' => 'ids']);
+
+                            if (!empty($categories)) {
+                            $args = [
+                                'post_type' => 'photo',
+                                'posts_per_page' => 2,
+                                'post__not_in' => [get_the_ID()],
+                                'tax_query' => [
+                                [
+                                    'taxonomy' => 'categorie',
+                                    'field'    => 'term_id',
+                                    'terms'    => $categories,
+                                ]
+                                ]
+                            ];
+
+                            $related_query = new WP_Query($args);
+
+                            if ($related_query->have_posts()) :
+                                while ($related_query->have_posts()) : $related_query->the_post();
+                                get_template_part('template_parts/related-photos');
+                                endwhile;
+                                wp_reset_postdata();
+                            else :
+                                echo '<p>Aucune photo apparentée trouvée.</p>';
+                            endif;
+                            }
+                            ?>
+
+                        </div>
+                </div>
+            </div>
         </article>
 
     <?php endwhile; endif; ?>
