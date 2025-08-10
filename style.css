@@ -440,8 +440,9 @@ margin-top: 20px;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  justify-content: space-around;
-  margin: 4% 0 5% 0;
+  justify-content: center;
+  gap: 30px;
+  margin: 50px 0 50px 0;
 }
 
 .related-thumbnail {
@@ -454,4 +455,24 @@ height: 60vh;
 width: 100%;
 height: 100%;
 object-fit: cover;
+}
+
+
+/* hero header */
+
+.hero-header {
+  background-size: cover;        /* couvre tout le conteneur */
+  background-position: center;   /* centre l'image */
+  background-repeat: no-repeat;  /* pas de répétition */
+  height: 100vh;                  /* 100% de la hauteur de la fenêtre */
+  width: 100%;                    /* toute la largeur */
+  display: flex;                  /* pour centrer le h1 */
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-header h1 {
+  color: transparent;               /* texte transparent */
+  -webkit-text-stroke: 2px white;   /* contour blanc */
+  text-align: center;               /* centrer le texte */
 }

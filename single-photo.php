@@ -18,7 +18,7 @@ get_header();
                         <?php echo implode(', ', wp_list_pluck(wp_get_post_terms(get_the_ID(), 'categorie'), 'name')); ?>
                     </p>
 
-                    <p class="description-photo">Catégorie :
+                    <p class="description-photo">Format :
                         <?php echo implode(', ', wp_list_pluck(wp_get_post_terms(get_the_ID(), 'format'), 'name')); ?>
                     </p>
 
@@ -127,7 +127,6 @@ get_header();
                             ?>
 
                         </div>
-                </div>
             </div>
         </article>
 

@@ -1,5 +1,5 @@
 <?php
-// Charger CSS et JS
+// Charger CSS, JS et font awesome
 function mon_theme_enqueue_assets() {
     wp_enqueue_style('mon-style', get_stylesheet_uri());
     wp_enqueue_script('mon-scripts', get_template_directory_uri() . '/scripts.js', ['jquery'], false, true);
@@ -90,3 +90,24 @@ function cptui_register_my_taxes_categorie() {
 	register_taxonomy( "categorie", [ "photo" ], $args );
 }
 add_action( 'init', 'cptui_register_my_taxes_categorie' );
+
+//* format pour la médiateque
+
+function add_format_taxonomy_to_attachments() {
+    register_taxonomy_for_object_type( 'format', 'attachment' );
+}
+add_action( 'init', 'add_format_taxonomy_to_attachments' );
+
+//* filtrer les images pour le héro header
+
+add_filter('acf/fields/image/query/name=Hero_header', function($args, $field, $post_id) {
+    $args['tax_query'] = array(
+        array(
+            'taxonomy' => 'format',
+            'field'    => 'slug',
+            'terms'    => array('paysage') // slug exact de ta taxonomie
+        )
+    );
+    return $args;
+}, 10, 3);
+
