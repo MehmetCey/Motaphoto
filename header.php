@@ -20,11 +20,9 @@
         'theme_location' => 'main-menu',
         'container' => false,
         'menu_class' => 'menu',
+        'items_wrap'     => '<ul id="%1$s" class="%2$s">%3$s<li class="menu-item contact-popup"><a href="#" id="open-contact">Contact</a></li></ul>',
       ]);
       ?>
     </nav>
   </div>
-  <!-- <div class="header-img">
-    <img src="<?php echo get_template_directory_uri(); ?>/assets/img/Header.png" alt="photo d'un événement en fond de l'écriture Photographe Event">
-  </div> -->
 </header>

@@ -2,8 +2,10 @@
 // Charger CSS, JS et font awesome
 function mon_theme_enqueue_assets() {
     wp_enqueue_style('mon-style', get_stylesheet_uri());
+    wp_enqueue_script('lightbox', get_template_directory_uri() . '/lightbox.js', ['jquery'], false, true);
     wp_enqueue_script('mon-scripts', get_template_directory_uri() . '/scripts.js', ['jquery'], false, true);
     wp_enqueue_style( 'font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css' );
+    
 }
 
 add_action('wp_enqueue_scripts', 'mon_theme_enqueue_assets');
@@ -111,3 +113,111 @@ add_filter('acf/fields/image/query/name=Hero_header', function($args, $field, $p
     return $args;
 }, 10, 3);
 
+//* ajax 
+
+function charger_toutes_photos() {
+    $args = [
+        'post_type' => 'photo',
+        'posts_per_page' => -1,
+    ];
+
+    if (!empty($_POST['categorie'])) {
+        $args['tax_query'][] = [
+            'taxonomy' => 'categorie',
+            'field'    => 'slug',
+            'terms'    => sanitize_text_field($_POST['categorie']),
+        ];
+    }
+
+    if (!empty($_POST['format'])) {
+        $args['tax_query'][] = [
+            'taxonomy' => 'format',
+            'field'    => 'slug',
+            'terms'    => sanitize_text_field($_POST['format']),
+        ];
+    }
+
+    if (!empty($_POST['tri'])) {
+        if ($_POST['tri'] === 'date') {
+            $args['orderby'] = 'date';
+            $args['order']   = 'DESC';
+        }
+        // tu peux rajouter d'autres tris ici
+    }
+
+    $query = new WP_Query($args);
+
+    if ($query->have_posts()) {
+        while ($query->have_posts()) : $query->the_post();
+            get_template_part('template-parts/photo', 'card'); // ton HTML d’une photo
+        endwhile;
+        wp_reset_postdata();
+    }
+    wp_die();
+}
+add_action('wp_ajax_charger_toutes_photos', 'charger_toutes_photos');
+add_action('wp_ajax_nopriv_charger_toutes_photos', 'charger_toutes_photos');
+
+
+
+function charger_scripts() {
+  wp_enqueue_script('mon-script', get_template_directory_uri() . '/scripts.js', ['jquery'], '1.0', true);
+  wp_localize_script('mon-script', 'mon_ajax_obj', ['ajaxurl' => admin_url('admin-ajax.php')]);
+}
+add_action('wp_enqueue_scripts', 'charger_scripts');
+
+// Fonction pour filtrer et trier les photos
+function filtrer_photos() {
+$categorie = isset($_POST['categorie']) ? intval($_POST['categorie']) : '';
+$format    = isset($_POST['format']) ? intval($_POST['format']) : '';
+$tri       = isset($_POST['tri']) ? $_POST['tri'] : '';
+
+$args = [
+    'post_type' => 'photo',
+    'posts_per_page' => -1,
+];
+
+// Filtre catégorie
+if ($categorie) {
+    $args['tax_query'][] = [
+        'taxonomy' => 'categorie',
+        'field'    => 'term_id',
+        'terms'    => $categorie
+    ];
+}
+
+// Filtre format
+if ($format) {
+    $args['tax_query'][] = [
+        'taxonomy' => 'format',
+        'field'    => 'term_id',
+        'terms'    => $format
+    ];
+}
+
+// Tri
+if ($tri === 'date-desc') {
+    $args['orderby'] = 'date';
+    $args['order'] = 'DESC';
+} elseif ($tri === 'date-asc') {
+    $args['orderby'] = 'date';
+    $args['order'] = 'ASC';
+}
+
+$query = new WP_Query($args);
+
+
+    if ($query->have_posts()) :
+        while ($query->have_posts()) : $query->the_post();
+            get_template_part('template_parts/related-photos');
+        endwhile;
+    else:
+        echo '<p>Aucune photo trouvée.</p>';
+    endif;
+
+    wp_reset_postdata();
+    wp_die();
+}
+
+add_action('wp_ajax_filtrer_photos', 'filtrer_photos');
+add_action('wp_ajax_nopriv_filtrer_photos', 'filtrer_photos');
