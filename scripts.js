@@ -5,26 +5,31 @@ document.addEventListener("DOMContentLoaded", function () {
     let monBoutonContact = document.querySelector(".contact-button");
     let monBoutonContactMenu = document.querySelector(".contact-popup");
 
-    if (monBouton && monPopup) {
+    /* fermeture sur croix */
+if (monBouton && monPopup) {
         monBouton.addEventListener("click", function () {
             monPopup.classList.add("popup-display-none");
             monPopupbackdrop.classList.add("popup-display-none");
         });
-    }
+      }
+/* fermeture au clic en dehors de l'overlay */
 
-    if (monBoutonContact && monPopup) {
+        monPopupbackdrop.addEventListener("click", function () {
+            monPopup.classList.add("popup-display-none");
+            monPopupbackdrop.classList.add("popup-display-none");
+        });
+/* ouverture sur bouton dans single page */
+if (monBoutonContact && monPopup) {
         monBoutonContact.addEventListener("click", function () {
             monPopup.classList.remove("popup-display-none");
             monPopupbackdrop.classList.remove("popup-display-none");
         });
-    }
-
-    if (monBoutonContactMenu && monPopup) {
+      }
+/* ouverture au clic sur contact dans menu */
         monBoutonContactMenu.addEventListener("click", function () {
             monPopup.classList.remove("popup-display-none");
             monPopupbackdrop.classList.remove("popup-display-none");
         });
-    }
 
     jQuery(document).ready(function($) {
     $('#ref-photo').val(photoRef);
@@ -86,4 +91,3 @@ jQuery(document).ready(function($) {
     // Déclencher la mise à jour quand un select change
     $('#filtre-categorie, #filtre-format, #tri-photos').on('change', updatePhotos);
 });
-

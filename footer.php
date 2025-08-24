@@ -5,7 +5,7 @@
       'theme_location' => 'footer-menu',
       'container' => false,
       'menu_class' => 'footer-menu',
-      'items_wrap'     => '<ul id="%1$s" class="%2$s">%3$s<li class="menu-item contact-popup"><p">tous droits réservés<p></li></ul>',
+      'items_wrap'     => '<ul id="%1$s" class="%2$s">%3$s<li class="menu-item"><p">tous droits réservés<p></li></ul>',
     ]);
     ?>
   </nav>
