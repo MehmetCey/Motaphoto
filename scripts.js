@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let monPopupbackdrop = document.querySelector(".contact-backdrop");
     let monPopup = document.querySelector(".contact-overlay");
     let monBoutonContact = document.querySelector(".contact-button");
-    let monBoutonContactMenu = document.querySelector(".contact-popup");
+    let monBoutonContactMenu = document.querySelectorAll(".contact-popup");
 
     /* fermeture sur croix */
 if (monBouton && monPopup) {
@@ -26,19 +26,44 @@ if (monBoutonContact && monPopup) {
         });
       }
 /* ouverture au clic sur contact dans menu */
-        monBoutonContactMenu.addEventListener("click", function () {
-            monPopup.classList.remove("popup-display-none");
-            monPopupbackdrop.classList.remove("popup-display-none");
-        });
+monBoutonContactMenu.forEach(function(bouton) {
+    bouton.addEventListener("click", function (e) {
+        e.preventDefault(); // évite le scroll en haut
+        monPopup.classList.remove("popup-display-none");
+        monPopupbackdrop.classList.remove("popup-display-none");
+    });
+});
 
     jQuery(document).ready(function($) {
     $('#ref-photo').val(photoRef);
     });
 
+
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+  const openBtn = document.getElementById("burger-menu");
+  const closeBtn = document.getElementById("burger-close");
+  const overlay = document.getElementById("mobile-menu-overlay");
+
+  openBtn.addEventListener("click", () => {
+    overlay.classList.remove("popup-display-none");
+    openBtn.classList.add("popup-display-none");
+    closeBtn.classList.remove("popup-display-none");
+  });
+
+  closeBtn.addEventListener("click", () => {
+    overlay.classList.add("popup-display-none");
+    closeBtn.classList.add("popup-display-none");
+    openBtn.classList.remove("popup-display-none");
+  });
+});
+
+
 jQuery(document).ready(function($){
-  $('#charger-plus').on('click', function(){
+  let page = 2; // page 1 déjà affichée
+
+  function loadPhotos(paged = 1, append = true) {
     let categorie = $('#filtre-categorie').val();
     let format    = $('#filtre-format').val();
     let tri       = $('#tri-photos').val();
@@ -50,19 +75,42 @@ jQuery(document).ready(function($){
         action: 'charger_toutes_photos',
         categorie: categorie,
         format: format,
-        tri: tri
+        tri: tri,
+        paged: paged
       },
       success: function(response) {
-        if (response.trim() !== '') {
-          $('.related-photos-container').append(response); // append au lieu de remplacer
-          if (typeof buildPhotos === "function") {
-            buildPhotos(); // reconstruire la liste pour fullscreen
-          }
-        } else {
-          $('#charger-plus').hide(); // rien à charger → on cache le bouton
+        if (response == 0) {
+          $('#charger-plus').hide(); // plus de photos
+          return;
         }
-      },
+
+        if (append) {
+          $('.related-photos-container').append(response);
+        } else {
+          $('.related-photos-container').html(response);
+        }
+
+        // ⚡ vérifier s’il reste des photos
+        let remaining = parseInt($(response).filter('.remaining-posts').data('remaining'));
+        if (remaining <= 0) {
+          $('#charger-plus').hide();
+        } else {
+          $('#charger-plus').show();
+        }
+      }
     });
+  }
+
+  // 👉 Bouton "Charger plus"
+  $('#charger-plus').on('click', function(){
+    loadPhotos(page);
+    page++;
+  });
+
+  // 👉 Filtrage par catégorie / format / tri
+  $('#filtre-categorie, #filtre-format, #tri-photos').on('change', function(){
+    page = 2; // reset pagination pour les filtres
+    loadPhotos(1, false); // remplace les photos existantes
   });
 });
 
@@ -91,3 +139,4 @@ jQuery(document).ready(function($) {
     // Déclencher la mise à jour quand un select change
     $('#filtre-categorie, #filtre-format, #tri-photos').on('change', updatePhotos);
 });
+

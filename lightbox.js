@@ -62,23 +62,6 @@ window.buildPhotos = function() {
         }
     });
 
-    // ⚡️ Maintenant on branche buildPhotos sur AJAX
-    // Charger plus
-    $('#charger-plus').on('click', function(){
-        $.ajax({
-            url: mon_ajax_obj.ajaxurl,
-            type: 'POST',
-            data: { action: 'charger_toutes_photos' },
-            success: function(response) {
-                if (response) {
-                    $('.related-photos-container').html(response);
-                    $('#charger-plus').hide();
-                    buildPhotos();
-                }
-            },
-        });
-    });
-
     // Filtrage
     function updatePhotos() {
         var categorie = $('#filtre-categorie').val();

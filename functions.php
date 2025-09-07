@@ -3,12 +3,12 @@
 function mon_theme_enqueue_assets() {
     wp_enqueue_style('mon-style', get_stylesheet_uri());
     wp_enqueue_script('lightbox', get_template_directory_uri() . '/lightbox.js', ['jquery'], false, true);
-    wp_enqueue_script('mon-scripts', get_template_directory_uri() . '/scripts.js', ['jquery'], false, true);
-    wp_enqueue_style( 'font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css' );
-    
+    wp_enqueue_script('mon-script', get_template_directory_uri() . '/scripts.js', ['jquery'], '1.0', true);
+    wp_localize_script('mon-script', 'mon_ajax_obj', ['ajaxurl' => admin_url('admin-ajax.php')]);
+    wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
 }
-
 add_action('wp_enqueue_scripts', 'mon_theme_enqueue_assets');
+
 
 // Enregistrer les menus
 function register_my_menus() {
@@ -116,55 +116,63 @@ add_filter('acf/fields/image/query/name=Hero_header', function($args, $field, $p
 //* ajax 
 
 function charger_toutes_photos() {
+    $paged  = isset($_POST['paged']) ? intval($_POST['paged']) : 1;
+    $posts_per_page = 8;
+    $offset = ($paged - 1) * $posts_per_page;
+
     $args = [
-        'post_type' => 'photo',
-        'posts_per_page' => -1,
+        'post_type'      => 'photo',
+        'posts_per_page' => $posts_per_page,
+        'offset'         => $offset,
     ];
 
     if (!empty($_POST['categorie'])) {
         $args['tax_query'][] = [
             'taxonomy' => 'categorie',
-            'field'    => 'slug',
-            'terms'    => sanitize_text_field($_POST['categorie']),
+            'field'    => 'term_id',
+            'terms'    => intval($_POST['categorie']),
         ];
     }
 
     if (!empty($_POST['format'])) {
         $args['tax_query'][] = [
             'taxonomy' => 'format',
-            'field'    => 'slug',
-            'terms'    => sanitize_text_field($_POST['format']),
+            'field'    => 'term_id',
+            'terms'    => intval($_POST['format']),
         ];
     }
 
     if (!empty($_POST['tri'])) {
-        if ($_POST['tri'] === 'date') {
+        if ($_POST['tri'] === 'date-desc') {
             $args['orderby'] = 'date';
             $args['order']   = 'DESC';
+        } elseif ($_POST['tri'] === 'date-asc') {
+            $args['orderby'] = 'date';
+            $args['order']   = 'ASC';
         }
-        // tu peux rajouter d'autres tris ici
     }
 
     $query = new WP_Query($args);
+    $total_posts = $query->found_posts;
 
     if ($query->have_posts()) {
         while ($query->have_posts()) : $query->the_post();
-            get_template_part('template-parts/photo', 'card'); // ton HTML d’une photo
+            get_template_part('template_parts/related-photos');
         endwhile;
         wp_reset_postdata();
+
+        // ⚡ Indicateur pour le JS du nombre restant
+        $remaining = max(0, $total_posts - ($offset + $posts_per_page));
+        echo '<span class="remaining-posts" data-remaining="' . $remaining . '"></span>';
+    } else {
+        echo 0; // plus de posts
     }
+
     wp_die();
 }
 add_action('wp_ajax_charger_toutes_photos', 'charger_toutes_photos');
 add_action('wp_ajax_nopriv_charger_toutes_photos', 'charger_toutes_photos');
 
-
-
-function charger_scripts() {
-  wp_enqueue_script('mon-script', get_template_directory_uri() . '/scripts.js', ['jquery'], '1.0', true);
-  wp_localize_script('mon-script', 'mon_ajax_obj', ['ajaxurl' => admin_url('admin-ajax.php')]);
-}
-add_action('wp_enqueue_scripts', 'charger_scripts');
 
 // Fonction pour filtrer et trier les photos
 function filtrer_photos() {
@@ -174,7 +182,7 @@ $tri       = isset($_POST['tri']) ? $_POST['tri'] : '';
 
 $args = [
     'post_type' => 'photo',
-    'posts_per_page' => -1,
+    'posts_per_page' => 8,
 ];
 
 // Filtre catégorie
