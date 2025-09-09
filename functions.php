@@ -155,20 +155,21 @@ function charger_toutes_photos() {
     $query = new WP_Query($args);
     $total_posts = $query->found_posts;
 
+    ob_start(); 
     if ($query->have_posts()) {
         while ($query->have_posts()) : $query->the_post();
             get_template_part('template_parts/related-photos');
         endwhile;
         wp_reset_postdata();
-
-        // ⚡ Indicateur pour le JS du nombre restant
-        $remaining = max(0, $total_posts - ($offset + $posts_per_page));
-        echo '<span class="remaining-posts" data-remaining="' . $remaining . '"></span>';
-    } else {
-        echo 0; // plus de posts
     }
+    $html = ob_get_clean();
 
-    wp_die();
+    $remaining = max(0, $total_posts - ($offset + $posts_per_page));
+
+    wp_send_json([
+        'html' => $html,
+        'remaining' => $remaining
+    ]);
 }
 add_action('wp_ajax_charger_toutes_photos', 'charger_toutes_photos');
 add_action('wp_ajax_nopriv_charger_toutes_photos', 'charger_toutes_photos');

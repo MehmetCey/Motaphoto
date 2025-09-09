@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 jQuery(document).ready(function($){
-  let page = 2; // page 1 déjà affichée
+  let page = 2;
 
   function loadPhotos(paged = 1, append = true) {
     let categorie = $('#filtre-categorie').val();
@@ -71,6 +71,7 @@ jQuery(document).ready(function($){
     $.ajax({
       url: mon_ajax_obj.ajaxurl,
       type: 'POST',
+      dataType: 'json', // on attend du JSON
       data: {
         action: 'charger_toutes_photos',
         categorie: categorie,
@@ -79,20 +80,13 @@ jQuery(document).ready(function($){
         paged: paged
       },
       success: function(response) {
-        if (response == 0) {
-          $('#charger-plus').hide(); // plus de photos
-          return;
-        }
-
         if (append) {
-          $('.related-photos-container').append(response);
+          $('.related-photos-container').append(response.html);
         } else {
-          $('.related-photos-container').html(response);
+          $('.related-photos-container').html(response.html);
         }
 
-        // ⚡ vérifier s’il reste des photos
-        let remaining = parseInt($(response).filter('.remaining-posts').data('remaining'));
-        if (remaining <= 0) {
+        if (response.remaining <= 0) {
           $('#charger-plus').hide();
         } else {
           $('#charger-plus').show();
@@ -101,16 +95,14 @@ jQuery(document).ready(function($){
     });
   }
 
-  // 👉 Bouton "Charger plus"
   $('#charger-plus').on('click', function(){
     loadPhotos(page);
     page++;
   });
 
-  // 👉 Filtrage par catégorie / format / tri
   $('#filtre-categorie, #filtre-format, #tri-photos').on('change', function(){
-    page = 2; // reset pagination pour les filtres
-    loadPhotos(1, false); // remplace les photos existantes
+    page = 2;
+    loadPhotos(1, false);
   });
 });
 
