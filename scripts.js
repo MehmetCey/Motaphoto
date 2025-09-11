@@ -41,6 +41,8 @@ monBoutonContactMenu.forEach(function(bouton) {
 
 });
 
+/* burger menu */
+
 document.addEventListener("DOMContentLoaded", () => {
   const openBtn = document.getElementById("burger-menu");
   const closeBtn = document.getElementById("burger-close");
@@ -59,6 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+/* charger plus */
 
 jQuery(document).ready(function($){
   let page = 2;
@@ -71,7 +74,7 @@ jQuery(document).ready(function($){
     $.ajax({
       url: mon_ajax_obj.ajaxurl,
       type: 'POST',
-      dataType: 'json', // on attend du JSON
+      dataType: 'json', 
       data: {
         action: 'charger_toutes_photos',
         categorie: categorie,
@@ -106,6 +109,7 @@ jQuery(document).ready(function($){
   });
 });
 
+/* filtrage */
 
 jQuery(document).ready(function($) {
     function updatePhotos() {
@@ -132,3 +136,37 @@ jQuery(document).ready(function($) {
     $('#filtre-categorie, #filtre-format, #tri-photos').on('change', updatePhotos);
 });
 
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".custom-dropdown").forEach(dropdown => {
+  const selected = dropdown.querySelector(".dropdown-selected");
+
+  selected.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = dropdown.classList.contains("open");
+
+    // Fermer tous les autres
+    document.querySelectorAll(".custom-dropdown").forEach(d => d.classList.remove("open"));
+
+    // Ouvrir celui cliqué
+    if (!isOpen) {
+      dropdown.classList.add("open");
+    }
+  });
+
+  dropdown.querySelectorAll(".dropdown-options li").forEach(option => {
+    option.addEventListener("click", () => {
+      selected.textContent = option.textContent;
+      selected.dataset.value = option.dataset.value;
+      dropdown.classList.remove("open");
+
+      console.log(dropdown.dataset.name, option.dataset.value);
+    });
+  });
+});
+
+document.addEventListener("click", () => {
+  document.querySelectorAll(".custom-dropdown").forEach(d => d.classList.remove("open"));
+});
+
+});

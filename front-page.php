@@ -21,37 +21,43 @@ $formats = get_terms([
 
 <section class="photos-list">
     <section class="tri-photos">
-        <div class="tri-taxo">
-            <div class="custom-select">
-            <select id="filtre-categorie">
-                <option value="">CATÉGORIES</option>
+    <div class="tri-taxo">
+        <!-- Catégories -->
+        <div class="custom-dropdown" data-name="categorie">
+            <div class="dropdown-selected">CATÉGORIES</div>
+            <ul class="dropdown-options">
                 <?php foreach ($categories as $categorie) : ?>
-                <option value="<?php echo esc_attr($categorie->term_id); ?>">
-                    <?php echo esc_html($categorie->name); ?>
-                </option>
+                    <li data-value="<?php echo esc_attr($categorie->term_id); ?>">
+                        <?php echo esc_html($categorie->name); ?>
+                    </li>
                 <?php endforeach; ?>
-            </select>
-            </div>
+            </ul>
+        </div>
 
-            <div class="custom-select">
-            <select id="filtre-format">
-                <option value="">FORMATS</option>
+        <!-- Formats -->
+        <div class="custom-dropdown" data-name="format">
+            <div class="dropdown-selected">FORMATS</div>
+            <ul class="dropdown-options">
                 <?php foreach ($formats as $format) : ?>
-                <option value="<?php echo esc_attr($format->term_id); ?>">
-                    <?php echo esc_html($format->name); ?>
-                </option>
+                    <li data-value="<?php echo esc_attr($format->term_id); ?>">
+                        <?php echo esc_html($format->name); ?>
+                    </li>
                 <?php endforeach; ?>
-            </select>
-            </div>
+            </ul>
         </div>
-        <div class="custom-select">
-            <select id="tri-photos">
-            <option value="">TRIER PAR</option>
-            <option value="date-desc">Plus récentes</option>
-            <option value="date-asc">Plus anciennes</option>
-            </select>
-        </div>
-    </section>
+    </div>
+
+    <!-- Trier par -->
+    <div class="custom-dropdown" data-name="tri">
+        <div class="dropdown-selected">TRIER PAR</div>
+        <ul class="dropdown-options">
+            <li data-value="date-desc">Plus récentes</li>
+            <li data-value="date-asc">Plus anciennes</li>
+        </ul>
+    </div>
+</section>
+
+
 
     <section class="related-photos-container">
         <?php

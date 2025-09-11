@@ -12,7 +12,7 @@ window.buildPhotos = function() {
       cat: jQuery(this).data('category')
     });
   });
-  window.photos = photos; // accessible globalement
+  window.photos = photos;
 };
 
 
