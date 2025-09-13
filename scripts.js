@@ -63,23 +63,195 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* charger plus */
 
-jQuery(document).ready(function($){
-  let page = 2;
+// jQuery(document).ready(function($){
+//   let page = 2;
 
-  function loadPhotos(paged = 1, append = true) {
-    let categorie = $('#filtre-categorie').val();
-    let format    = $('#filtre-format').val();
-    let tri       = $('#tri-photos').val();
+//   function getFilters() {
+//     return {
+//       categorie: $('.custom-dropdown[data-name="categorie"] .dropdown-selected').data('value') || '',
+//       format: $('.custom-dropdown[data-name="format"] .dropdown-selected').data('value') || '',
+//       tri: $('.custom-dropdown[data-name="tri"] .dropdown-selected').data('value') || ''
+//     };
+//   }
+
+//   function loadPhotos(paged = 1, append = true) {
+//     let filters = getFilters();
+
+//     $.ajax({
+//       url: mon_ajax_obj.ajaxurl,
+//       type: 'POST',
+//       dataType: 'json',
+//       data: {
+//         action: 'charger_toutes_photos',
+//         categorie: filters.categorie,
+//         format: filters.format,
+//         tri: filters.tri,
+//         paged: paged
+//       },
+//       success: function(response) {
+//         if (append) {
+//           $('.related-photos-container').append(response.html);
+//         } else {
+//           $('.related-photos-container').html(response.html);
+//         }
+
+//         if (response.remaining <= 0) {
+//           $('#charger-plus').hide();
+//         } else {
+//           $('#charger-plus').show();
+//         }
+//       }
+//     });
+//   }
+
+//   // Bouton "Charger plus"
+//   $('#charger-plus').on('click', function(){
+//     loadPhotos(page);
+//     page++;
+//   });
+
+//   // Filtrage → reset page + recharge
+//   $('.custom-dropdown .dropdown-options li').on('click', function(){
+//     page = 2;
+//     loadPhotos(1, false);
+//   });
+// });
+
+
+// /* filtrage */
+
+// jQuery(document).ready(function($) {
+//     function updatePhotos() {
+//         var categorie = $('.custom-dropdown[data-name="categorie"] .dropdown-selected').data('value') || '';
+//         var format    = $('.custom-dropdown[data-name="format"] .dropdown-selected').data('value') || '';
+//         var tri       = $('.custom-dropdown[data-name="tri"] .dropdown-selected').data('value') || '';
+
+//         $.ajax({
+//             url: mon_ajax_obj.ajaxurl,
+//             type: 'POST',
+//             data: {
+//                 action: 'filtrer_photos',
+//                 categorie: categorie,
+//                 format: format,
+//                 tri: tri
+//             },
+//             success: function(response) {
+//                 $('.related-photos-container').html(response);
+//             }
+//         });
+//     }
+
+//     // Gestion du clic sur une option
+//     $('.custom-dropdown .dropdown-options li').on('click', function() {
+//         var $dropdown = $(this).closest('.custom-dropdown');
+//         var $selected = $dropdown.find('.dropdown-selected');
+
+//         // mettre à jour le texte et la valeur
+//         $selected.text($(this).text());
+//         $selected.data('value', $(this).data('value'));
+
+//         $dropdown.removeClass('open');
+
+//         // déclencher le filtrage
+//         updatePhotos();
+//     });
+
+//     // Ouverture/fermeture du dropdown
+//     $('.dropdown-selected').on('click', function(e) {
+//         e.stopPropagation();
+//         var $dropdown = $(this).closest('.custom-dropdown');
+//         $('.custom-dropdown').not($dropdown).removeClass('open'); // ferme les autres
+//         $dropdown.toggleClass('open');
+//     });
+
+//     // Fermer en cliquant à l’extérieur
+//     $(document).on('click', function() {
+//         $('.custom-dropdown').removeClass('open');
+//     });
+// });
+
+jQuery(document).ready(function($) {
+  let currentIndex = -1;
+  let photos = [];
+  let page = 1;
+
+  // -------- buildPhotos (reconstruit la liste pour la lightbox) --------
+  window.buildPhotos = function() {
+    photos = [];
+    $('.related-thumbnail img').each(function() {
+      photos.push({
+        src: $(this).data('full'),
+        ref: $(this).data('reference'),
+        cat: $(this).data('category')
+      });
+    });
+  };
+
+  // -------- ouverture lightbox --------
+  function openLightbox(index) {
+    currentIndex = index;
+    $('#lightbox-img').attr('src', photos[index].src);
+    $('#lightbox-ref').text(photos[index].ref || '');
+    $('#lightbox-cat').text(photos[index].cat || '');
+    $('#lightbox-overlay').css('display', 'flex');
+  }
+
+  $(document).on('click', '.fullscreen-icon', function(e) {
+    e.preventDefault();
+    let img = $(this).closest('.related-thumbnail').find('img');
+    let src = img.data('full');
+
+    // On cherche l'image cliquée dans le tableau photos[]
+    let index = photos.findIndex(p => p.src === src);
+    if (index !== -1) openLightbox(index);
+  });
+
+  $('.lightbox-close, #lightbox-overlay').on('click', function(e) {
+    if ($(e.target).is('#lightbox-overlay, .lightbox-close')) {
+      $('#lightbox-overlay').hide();
+    }
+  });
+
+  $('.lightbox-prev').on('click', function(e) {
+    e.stopPropagation();
+    if (currentIndex > 0) {
+      openLightbox(currentIndex - 1);
+    } else {
+      openLightbox(photos.length - 1);
+    }
+  });
+
+  $('.lightbox-next').on('click', function(e) {
+    e.stopPropagation();
+    if (currentIndex < photos.length - 1) {
+      openLightbox(currentIndex + 1);
+    } else {
+      openLightbox(0);
+    }
+  });
+
+  // -------- getFilters (valeurs des faux dropdowns) --------
+  function getFilters() {
+    return {
+      categorie: $('.custom-dropdown[data-name="categorie"] .dropdown-selected').data('value') || '',
+      format: $('.custom-dropdown[data-name="format"] .dropdown-selected').data('value') || '',
+      tri: $('.custom-dropdown[data-name="tri"] .dropdown-selected').data('value') || ''
+    };
+  }
+
+  // -------- loadPhotos (filtrage + pagination) --------
+  function loadPhotos(paged = 1, append = false) {
+    let filters = getFilters();
 
     $.ajax({
       url: mon_ajax_obj.ajaxurl,
       type: 'POST',
-      dataType: 'json', 
+      dataType: 'json',
       data: {
         action: 'charger_toutes_photos',
-        categorie: categorie,
-        format: format,
-        tri: tri,
+        categorie: filters.categorie,
+        format: filters.format,
+        tri: filters.tri,
         paged: paged
       },
       success: function(response) {
@@ -89,6 +261,10 @@ jQuery(document).ready(function($){
           $('.related-photos-container').html(response.html);
         }
 
+        // rebuild la liste des photos pour lightbox
+        buildPhotos();
+
+        // gestion du bouton charger plus
         if (response.remaining <= 0) {
           $('#charger-plus').hide();
         } else {
@@ -98,75 +274,41 @@ jQuery(document).ready(function($){
     });
   }
 
-  $('#charger-plus').on('click', function(){
-    loadPhotos(page);
-    page++;
-  });
+  // -------- Dropdown : sélection d'une option --------
+  $(document).on('click', '.custom-dropdown .dropdown-options li', function() {
+    let $dropdown = $(this).closest('.custom-dropdown');
+    let $selected = $dropdown.find('.dropdown-selected');
 
-  $('#filtre-categorie, #filtre-format, #tri-photos').on('change', function(){
-    page = 2;
+    // Mettre à jour texte et valeur
+    $selected.text($(this).text());
+    $selected.data('value', $(this).data('value'));
+
+    $dropdown.removeClass('open');
+
+    // Filtrage dès le premier clic
+    page = 1;
     loadPhotos(1, false);
   });
-});
 
-/* filtrage */
-
-jQuery(document).ready(function($) {
-    function updatePhotos() {
-        var categorie = $('#filtre-categorie').val();
-        var format    = $('#filtre-format').val();
-        var tri       = $('#tri-photos').val();
-
-        $.ajax({
-            url: mon_ajax_obj.ajaxurl,
-            type: 'POST',
-            data: {
-                action: 'filtrer_photos',
-                categorie: categorie,
-                format: format,
-                tri: tri
-            },
-            success: function(response) {
-                $('.related-photos-container').html(response);
-            }
-        });
-    }
-
-    // Déclencher la mise à jour quand un select change
-    $('#filtre-categorie, #filtre-format, #tri-photos').on('change', updatePhotos);
-});
-
-
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".custom-dropdown").forEach(dropdown => {
-  const selected = dropdown.querySelector(".dropdown-selected");
-
-  selected.addEventListener("click", (e) => {
+  // -------- Dropdown : ouverture/fermeture --------
+  $(document).on('click', '.dropdown-selected', function(e) {
     e.stopPropagation();
-    const isOpen = dropdown.classList.contains("open");
-
-    // Fermer tous les autres
-    document.querySelectorAll(".custom-dropdown").forEach(d => d.classList.remove("open"));
-
-    // Ouvrir celui cliqué
-    if (!isOpen) {
-      dropdown.classList.add("open");
-    }
+    let $dropdown = $(this).closest('.custom-dropdown');
+    $('.custom-dropdown').not($dropdown).removeClass('open');
+    $dropdown.toggleClass('open');
   });
 
-  dropdown.querySelectorAll(".dropdown-options li").forEach(option => {
-    option.addEventListener("click", () => {
-      selected.textContent = option.textContent;
-      selected.dataset.value = option.dataset.value;
-      dropdown.classList.remove("open");
-
-      console.log(dropdown.dataset.name, option.dataset.value);
-    });
+  // Fermer dropdown en cliquant à l’extérieur
+  $(document).on('click', function() {
+    $('.custom-dropdown').removeClass('open');
   });
-});
 
-document.addEventListener("click", () => {
-  document.querySelectorAll(".custom-dropdown").forEach(d => d.classList.remove("open"));
-});
+  // -------- Bouton "Charger plus" --------
+  $('#charger-plus').on('click', function() {
+    page++;
+    loadPhotos(page, true);
+  });
 
+  // -------- Initialisation --------
+  buildPhotos();
 });

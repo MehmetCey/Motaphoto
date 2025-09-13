@@ -2,24 +2,26 @@ jQuery(document).ready(function($) {
     let currentIndex = -1;
     let photos = [];
 
-    // lightbox.js
-window.buildPhotos = function() {
-  photos = [];
-  jQuery('.related-thumbnail img').each(function() {
-    photos.push({
-      src: jQuery(this).data('full'),
-      ref: jQuery(this).data('reference'),
-      cat: jQuery(this).data('category')
-    });
-  });
-  window.photos = photos;
-};
-
+    // -------------------------
+    // Reconstruire la liste photos[]
+    // -------------------------
+    window.buildPhotos = function() {
+        photos = [];
+        $('.related-thumbnail img').each(function() {
+            photos.push({
+                src: $(this).data('full'),
+                ref: $(this).data('reference'),
+                cat: $(this).data('category')
+            });
+        });
+    };
 
     // Construire au premier chargement
     buildPhotos();
 
-    // ouvrir lightbox
+    // -------------------------
+    // Ouvrir la lightbox
+    // -------------------------
     function openLightbox(index) {
         currentIndex = index;
         $('#lightbox-img').attr('src', photos[index].src);
@@ -28,22 +30,39 @@ window.buildPhotos = function() {
         $('#lightbox-overlay').css('display', 'flex');
     }
 
-    // clic sur fullscreen
+    // -------------------------
+    // Clic sur fullscreen
+    // -------------------------
     $(document).on('click', '.fullscreen-icon', function(e) {
         e.preventDefault();
         let img = $(this).closest('.related-thumbnail').find('img');
-        let index = $('.related-thumbnail img').index(img);
-        openLightbox(index);
+        let src = img.data('full');
+
+        // Important : rebuild à chaque clic, au cas où du contenu a changé
+        buildPhotos();
+
+        // Normaliser les URLs pour éviter les soucis de slash ou tailles différentes
+        src = decodeURIComponent(src);
+
+        let index = photos.findIndex(p => decodeURIComponent(p.src) === src);
+
+        if (index !== -1) {
+            openLightbox(index);
+        }
     });
 
-    // fermer
+    // -------------------------
+    // Fermer lightbox
+    // -------------------------
     $('.lightbox-close, #lightbox-overlay').on('click', function(e) {
         if ($(e.target).is('#lightbox-overlay, .lightbox-close')) {
             $('#lightbox-overlay').hide();
         }
     });
 
-    // navigation
+    // -------------------------
+    // Navigation
+    // -------------------------
     $('.lightbox-prev').on('click', function(e) {
         e.stopPropagation();
         if (currentIndex > 0) {
@@ -62,28 +81,40 @@ window.buildPhotos = function() {
         }
     });
 
-    // Filtrage
+    // -------------------------
+    // Filtrage (Ajax)
+    // -------------------------
     function updatePhotos() {
-        var categorie = $('#filtre-categorie').val();
-        var format    = $('#filtre-format').val();
-        var tri       = $('#tri-photos').val();
+    var categorie = $('#filtre-categorie').val();
+    var format    = $('#filtre-format').val();
+    var tri       = $('#tri-photos').val();
 
-        $.ajax({
-            url: mon_ajax_obj.ajaxurl,
-            type: 'POST',
-            data: {
-                action: 'filtrer_photos',
-                categorie: categorie,
-                format: format,
-                tri: tri
-            },
-            success: function(response) {
-                $('.related-photos-container').html(response);
-                buildPhotos();
-                $('#charger-plus').hide();
-            }
-        });
-    }
-    $('#filtre-categorie, #filtre-format, #tri-photos').on('change', updatePhotos);
+    // Reset pagination
+    page = 2;
+
+    $.ajax({
+        url: mon_ajax_obj.ajaxurl,
+        type: 'POST',
+        data: {
+            action: 'filtrer_photos',
+            categorie: categorie,
+            format: format,
+            tri: tri
+        },
+        success: function(response) {
+            $('.related-photos-container').html(response);
+
+            // Toujours rebuild les photos après un rendu Ajax
+            buildPhotos();
+
+            // Cacher le bouton charger plus après filtrage
+            $('#charger-plus').hide();
+        }
+    });
+}
+
+
+    $('#filtre-categorie, #filtre-format, #tri-photos').on('change', function(){
+        updatePhotos();
+    });
 });
-
